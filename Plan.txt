@@ -1,0 +1,6 @@
+1. How to run script file
+2. Create signature.txt
+2. Script for detecting files
+3. Extract md5
+4. Check md5 from db or signature.txt
+5. If in database remove file and update database
