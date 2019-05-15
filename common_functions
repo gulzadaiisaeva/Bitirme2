@@ -1,0 +1,10 @@
+# finding index start
+
+vowels = ['a', 'e', 'i', 'o', 'i', 'u']
+
+try:
+    index = vowels.index('a')
+    print('The index of e:', index)
+except ValueError:
+    None
+# finding index end
