@@ -15,9 +15,9 @@ class Training:
     def __init__(self, folder_path):
         self.folder_path = folder_path
         self.uop_array = []
-        self.uop = []
+        self.all_uop = []
         self.matrix = []
-        self.threshold = 0.75
+        self.threshold = 1
 
     def fill_unique_code_arr(self):
         print("***** fill_unique_code_arr *****")
@@ -49,9 +49,9 @@ class Training:
         print("***** get_all_uop *****")
         for line in self.uop_array:
             for inst in line:
-                if inst not in self.uop and inst != "":
-                    self.uop.append(inst)
-        print("size uop: ", len(self.uop))
+                if inst not in self.all_uop and inst != "":
+                    self.all_uop.append(inst)
+        print("size uop: ", len(self.all_uop))
 
     def create_matrix(self, size):
         print("***** create_matrix *****")
@@ -67,15 +67,14 @@ class Training:
             for j in range(0,(len(self.uop_array[i]))-1):
                 for k in range(j+1, len(self.uop_array[i])):
                     try:
-                        first_index = self.uop.index(self.uop_array[i][j])
-                        second_index = self.uop.index(self.uop_array[i][k])
+                        first_index = self.all_uop.index(self.uop_array[i][j])
+                        second_index = self.all_uop.index(self.uop_array[i][k])
                     except ValueError:
                         print("Errrror ****************************")
                     self.matrix[second_index][first_index] += 1
-                    #self.matrix[first_index][second_index] += 1
+                    self.matrix[first_index][second_index] += 1
 
-        maximum = max(self.matrix)
-        self.normalization(len(self.uop))
+        self.normalization(len(self.all_uop))
         self.eliminate_weak_relations()
 
     def normalization(self, uop):
@@ -123,14 +122,14 @@ class Training:
             writer = csv.writer(csvFile)
             temprow = []
             temprow.append('')
-            for inst in self.uop:
+            for inst in self.all_uop:
                 temprow.append(inst)
             writer.writerow(temprow)
 
             i = 0
             for row in self.matrix:
                 temprow = []
-                temprow.append(self.uop[i])
+                temprow.append(self.all_uop[i])
                 for col in row:
                     temprow.append(col)
                 writer.writerow(temprow)
@@ -147,7 +146,7 @@ class Training:
             with open("../uniqueopcodes.txt", "a") as myfile:
                 myfile.write("\n\n")
 
-        for inst in self.uop:
+        for inst in self.all_uop:
             with open("../setofuniqueopcodes.txt", "a") as myfile2:
                 myfile2.write(inst)
                 myfile2.write(" ")
@@ -158,33 +157,35 @@ class Training:
             for j in range(len(self.matrix[i])):
                 self.matrix[i][j] = 0
 
-    def oper_data_set(self):
+    def operation_data_set(self):
         print("***** oper_data_set *****")
         j = 0
-        for i in range(0, 1500, 300):
+        for i in range(0, len(self.uop_array), CommonConstants.family_size):
             filename = "../dataset/matrix_csv/matrix" + str(j) + ".csv"
-            self.fill_matrix(i, i + 300)
+            self.fill_matrix(i, i + CommonConstants.family_size)
             self.write_matrix_to_csv(filename)
             self.empty_matrix()
             j += 1
 
-if os.path.exists("../uniqueopcodes.txt"):
-    os.remove("../uniqueopcodes.txt")
-if os.path.exists("../setofuniqueopcodes.txt"):
-    os.remove("../setofuniqueopcodes.txt")
+    def run(self):
+        if os.path.exists("../uniqueopcodes.txt"):
+            os.remove("../uniqueopcodes.txt")
+        if os.path.exists("../setofuniqueopcodes.txt"):
+            os.remove("../setofuniqueopcodes.txt")
+        self.fill_unique_code_arr()
+        self.set_folder_path("../dataset/MPCGEN")
+        self.fill_unique_code_arr()
+        self.set_folder_path("../dataset/MWOR_backup")
+        self.fill_unique_code_arr()
+        self.set_folder_path("../dataset/NGVCK")
+        self.fill_unique_code_arr()
+        self.set_folder_path("../dataset/PSMPC")
+        self.fill_unique_code_arr()
+        self.get_all_uop()
+        self.write_uniqs_to_file(self.uop_array)
+        self.create_matrix(len(self.all_uop))
+        self.operation_data_set()
+
 
 project = Training("../dataset/G2")
-project.fill_unique_code_arr()
-project.set_folder_path("../dataset/MPCGEN")
-project.fill_unique_code_arr()
-project.set_folder_path("../dataset/MWOR_backup")
-project.fill_unique_code_arr()
-project.set_folder_path("../dataset/NGVCK")
-project.fill_unique_code_arr()
-project.set_folder_path("../dataset/PSMPC")
-project.fill_unique_code_arr()
-project.get_all_uop()
-project.write_uniqs_to_file(project.uop_array)
-project.create_matrix(len(project.uop))
-project.oper_data_set()
-
+project.run()
