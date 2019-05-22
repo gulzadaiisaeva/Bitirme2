@@ -1,6 +1,7 @@
 
 from os import walk
 import CommonConstants
+from graph import Graph
 import csv
 import pandas as pd
 import networkx as nx
@@ -18,8 +19,10 @@ class Training:
         self.all_uop = []
         self.matrix = []
         self.threshold = 1
+        self.vector = []
+        self.N = 0  # N ← The number of unique opcodes in S;
 
-    def fill_unique_code_arr(self):
+    def extract_unique_opcode(self):
         print("***** fill_unique_code_arr *****")
         files = []
         for (dirpath, dirnames, filenames) in walk(self.folder_path):
@@ -45,16 +48,22 @@ class Training:
 
         print("size arr: ", len(self.uop_array))
 
+    def construct_co_opcode_graphs(self):
+        self.create_matrix()
+
+
     def get_all_uop(self):
         print("***** get_all_uop *****")
         for line in self.uop_array:
             for inst in line:
                 if inst not in self.all_uop and inst != "":
                     self.all_uop.append(inst)
-        print("size uop: ", len(self.all_uop))
+        self.N = len(self.all_uop)
+        print("size uop: ", self.N)
 
     def create_matrix(self, size):
         print("***** create_matrix *****")
+        self.matrix = []
         for j in range(size):
             temp_list = []
             for i in range(size):
@@ -74,7 +83,7 @@ class Training:
                     self.matrix[second_index][first_index] += 1
                     self.matrix[first_index][second_index] += 1
 
-        self.normalization(len(self.all_uop))
+        self.normalization(self.N)
         self.eliminate_weak_relations()
 
     def normalization(self, uop):
@@ -106,15 +115,14 @@ class Training:
     def set_folder_path(self, new_folder):
         self.folder_path = new_folder
 
-    def write_matrix_to_file(self):
-        print("***** write_matrix_to_file *****")
-        for row in self.matrix:
-            for col in row:
-                with open("../matrix.txt", "a") as myfile:
-                    myfile.write(str(col))
-                    myfile.write("    ")
-            with open("../matrix.txt", "a") as myfile:
-                myfile.write("\n\n")
+    def write_vectors_to_file(self):
+        print("***** write_vectors_to_file *****")
+        for i in self.vector:
+            with open("../vector.txt", "a") as myfile:
+                myfile.write(str(i))
+                myfile.write(",")
+        with open("../vector.txt", "a") as myfile:
+            myfile.write("\n\n")
 
     def write_matrix_to_csv(self, filename):
         print("***** write_csv *****")
@@ -157,14 +165,17 @@ class Training:
             for j in range(len(self.matrix[i])):
                 self.matrix[i][j] = 0
 
-    def operation_data_set(self):
-        print("***** oper_data_set *****")
+    def construct_co_opcode_graphs(self):
+        print("***** construct_co_opcode_graphs *****")
         j = 0
         for i in range(0, len(self.uop_array), CommonConstants.family_size):
             filename = "../dataset/matrix_csv/matrix" + str(j) + ".csv"
+            self.create_matrix(self.N)
             self.fill_matrix(i, i + CommonConstants.family_size)
             self.write_matrix_to_csv(filename)
-            self.empty_matrix()
+            index, cc = self.largest_connected_component()
+            self.extract_engine_signature(cc[index])
+            self.write_vectors_to_file()
             j += 1
 
     def run(self):
@@ -172,20 +183,52 @@ class Training:
             os.remove("../uniqueopcodes.txt")
         if os.path.exists("../setofuniqueopcodes.txt"):
             os.remove("../setofuniqueopcodes.txt")
-        self.fill_unique_code_arr()
+        if os.path.exists("../vector.txt"):
+            os.remove("../vector.txt")
+        self.extract_unique_opcode()
         self.set_folder_path("../dataset/MPCGEN")
-        self.fill_unique_code_arr()
+        self.extract_unique_opcode()
         self.set_folder_path("../dataset/MWOR_backup")
-        self.fill_unique_code_arr()
+        self.extract_unique_opcode()
         self.set_folder_path("../dataset/NGVCK")
-        self.fill_unique_code_arr()
+        self.extract_unique_opcode()
         self.set_folder_path("../dataset/PSMPC")
-        self.fill_unique_code_arr()
+        self.extract_unique_opcode()
         self.get_all_uop()
         self.write_uniqs_to_file(self.uop_array)
-        self.create_matrix(len(self.all_uop))
-        self.operation_data_set()
+        self.construct_co_opcode_graphs()
 
+    def largest_connected_component(self):
+        print("\n***** largest_connected_component *****")
+        g = Graph(len(self.matrix))
+        for i in range(len(self.matrix)):
+            for j in range(len(self.matrix[i])):
+                if self.matrix[i][j] != 0:
+                    g.addEdge(i, j)
+        cc = g.connectedComponents()
+        print("Following are connected components")
+        print(cc)
+
+        maximum = 0
+        index = -1
+        for i in range(len(cc)):
+            if maximum < len(cc[i]):
+                maximum = len(cc[i])
+                index += 1
+        print(maximum, index)
+
+        return index, cc
+
+    def extract_engine_signature(self, arr):
+        print("\n***** construct_vector *****")
+        self.vector = []
+        for i in range(0, self.N):
+            self.vector.append(0)
+
+        for i in arr:
+            self.vector[i] = 1
+        print("size vector: ", len(self.vector))
+        print(self.vector)
 
 project = Training("../dataset/G2")
 project.run()
