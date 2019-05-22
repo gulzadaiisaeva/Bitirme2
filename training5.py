@@ -48,10 +48,6 @@ class Training:
 
         print("size arr: ", len(self.uop_array))
 
-    def construct_co_opcode_graphs(self):
-        self.create_matrix()
-
-
     def get_all_uop(self):
         print("***** get_all_uop *****")
         for line in self.uop_array:
@@ -122,7 +118,7 @@ class Training:
                 myfile.write(str(i))
                 myfile.write(",")
         with open("../vector.txt", "a") as myfile:
-            myfile.write("\n\n")
+            myfile.write("\n")
 
     def write_matrix_to_csv(self, filename):
         print("***** write_csv *****")
@@ -146,13 +142,13 @@ class Training:
 
     def write_uniqs_to_file(self, arr):
         print("***** write_uniqs_to_file *****")
-        for line in arr:
+        '''for line in arr:
             for inst in line:
                 with open("../uniqueopcodes.txt", "a") as myfile:
                     myfile.write(inst)
                     myfile.write(", ")
             with open("../uniqueopcodes.txt", "a") as myfile:
-                myfile.write("\n\n")
+                myfile.write("\n\n")'''
 
         for inst in self.all_uop:
             with open("../setofuniqueopcodes.txt", "a") as myfile2:
@@ -172,7 +168,7 @@ class Training:
             filename = "../dataset/matrix_csv/matrix" + str(j) + ".csv"
             self.create_matrix(self.N)
             self.fill_matrix(i, i + CommonConstants.family_size)
-            self.write_matrix_to_csv(filename)
+            #self.write_matrix_to_csv(filename)
             index, cc = self.largest_connected_component()
             self.extract_engine_signature(cc[index])
             self.write_vectors_to_file()
@@ -206,8 +202,6 @@ class Training:
                 if self.matrix[i][j] != 0:
                     g.addEdge(i, j)
         cc = g.connectedComponents()
-        print("Following are connected components")
-        print(cc)
 
         maximum = 0
         index = -1
@@ -215,7 +209,6 @@ class Training:
             if maximum < len(cc[i]):
                 maximum = len(cc[i])
                 index += 1
-        print(maximum, index)
 
         return index, cc
 
