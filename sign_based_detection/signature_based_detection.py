@@ -46,14 +46,15 @@ class SignatureBased:
             self.virus_detected(filepath.replace("\n", ""), md5_returned)
         else:
             print("\nNot in database")
-            testing_project = testing.Testing(self.folderpath)
+            file_opcode_path = self.folderpath+"/opcode/"+filepath[0:len(filepath)-3] + "opcode"
+            testing_project = testing.Testing(file_opcode_path)
             flag = testing_project.testing_run()
             if flag is True:
                 self.virus_detected(filepath.replace("\n", ""), md5_returned)
-
-        flavor2 = easygui.buttonbox(
-            "A file " + filepath + " is not virus!\n",
-            choices=['OK'])
+            else:
+                flavor2 = easygui.buttonbox(
+                    "A file " + filepath + " is not virus!\n",
+                    choices=['OK'])
 
 
     def check_folder(self):

@@ -14,30 +14,22 @@ class Testing:
         self.vector = []
         self.data_set = []
 
-    def extract_opcodes(self):
+    def extract_opcodes(self, file):
         print("\n***** extract_opcodes *****")
         self.uop_array = []
-        files = []
-        for (dirpath, dirnames, filenames) in walk(self.folder_path):
-            files.extend(filenames)
-            break
-        print(files)
 
-        i = 0
-        while i < len(files):
-            try:
-                with open(self.folder_path + "/" + files[i], "r") as filestream:
-                    for line in filestream:
-                        current_line = line.split(',')
-                        for inst in current_line:
-                            if inst not in self.uop_array and inst != "" and inst != "\n":
-                                self.uop_array.append(inst)
+        try:
+            with open(file, "r") as filestream:
+                for line in filestream:
+                    current_line = line.split(',')
+                    for inst in current_line:
+                        if inst not in self.uop_array and inst != "" and inst != "\n":
+                            self.uop_array.append(inst)
 
-            except Exception as err:
-                print(err)
-            if os.path.exists(self.folder_path + "/" + files[i]):
-                os.remove(self.folder_path + "/" + files[i])
-            i += 1
+        except Exception as err:
+            print(err)
+        if os.path.exists(file):
+            os.remove(file)
 
         print("size arr: ", len(self.uop_array))
         print(self.uop_array)
@@ -93,8 +85,7 @@ class Testing:
 
     def testing_run(self):
         print("***** testing_run *****")
-        self.folder_path = self.folder_path + "/opcode"
-        self.extract_opcodes()
+        self.extract_opcodes(self.folder_path)
         self.get_uop_array(CommonConstants.setofuniquecodes)
         self.construct_vector()
         self.read_data_set()
