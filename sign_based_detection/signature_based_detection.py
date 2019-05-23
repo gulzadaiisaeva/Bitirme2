@@ -11,6 +11,7 @@ class SignatureBased:
         self.arguments = False
         self.autocompress = False
         self.folderpath = folderpath
+        self.result = []
 
     def virus_detected(self, viruspath, sha1):
         print("\n\nVirus detected...\n\n")
@@ -31,7 +32,7 @@ class SignatureBased:
                 easygui.msgbox("Error:\n" + str(err))
             print(viruspath)
 
-    def check_file(self, filepath):
+    def check_file(self, i, filepath):
         print("\n\nStarting scan of file: "+filepath)
 
         with open(self.folderpath+"/"+filepath, 'rb') as file_to_check:
@@ -44,6 +45,7 @@ class SignatureBased:
         if is_exist is not None:
             print("\nFounded in database")
             self.virus_detected(filepath.replace("\n", ""), md5_returned)
+            self.result.append(str(i) + ') ' + filepath + " : virus")
         else:
             print("\nNot in database")
             file_opcode_path = self.folderpath+"/opcode/"+filepath[0:len(filepath)-3] + "opcode"
@@ -56,15 +58,16 @@ class SignatureBased:
                 }
                 CommonConstants.virus_collection.insert(jsonFile)
                 print("Status:", "   Data successfully stored in MongoDB!! md5 : ", str(jsonFile['md5']))
-
+                self.result.append(str(i) + ') ' + filepath + " : virus")
             else:
                 flavor2 = easygui.buttonbox(
                     "A file " + filepath + " is not virus!\n",
                     choices=['OK'])
+                self.result.append(str(i) + ') ' + filepath + " : not virus")
 
     def check_folder(self):
         print("\nStarting scan of folder: " + self.folderpath)
-
+        self.result = []
         files = []
         for (dirpath, dirnames, filenames) in walk(self.folderpath):
             files.extend(filenames)
@@ -74,8 +77,9 @@ class SignatureBased:
         i = 0
         while i < len(files):
             try:
-                self.check_file(files[i])
+                self.check_file(i, files[i])
             except Exception as err:
                 print(err)
             i += 1
         print("Finished with following results:")
+        return self.result
