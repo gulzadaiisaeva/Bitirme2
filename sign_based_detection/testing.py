@@ -70,7 +70,7 @@ class Testing:
         print("***** read_data_set *****")
         self.data_set = []
         try:
-            with open("../vector.txt", "r") as filestream:
+            with open(CommonConstants.vektortxt, "r") as filestream:
                 for line in filestream:
                     file = []
                     current_line = line.split(",")
@@ -86,7 +86,7 @@ class Testing:
     def testing_run(self):
         print("***** testing_run *****")
         self.extract_opcodes(self.folder_path)
-        self.get_uop_array(CommonConstants.setofuniquecodes)
+        self.get_uop_array(CommonConstants.setofuniquecodestxt)
         self.construct_vector()
         self.read_data_set()
 

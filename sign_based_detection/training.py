@@ -74,7 +74,7 @@ class Training:
                         first_index = self.all_uop.index(self.uop_array[i][j])
                         second_index = self.all_uop.index(self.uop_array[i][k])
                     except ValueError:
-                        print("Errrror ****************************")
+                        print("ERROR")
                     self.matrix[second_index][first_index] += 1
                     self.matrix[first_index][second_index] += 1
 
@@ -113,10 +113,10 @@ class Training:
     def write_vectors_to_file(self):
         print("***** write_vectors_to_file *****")
         for i in self.vector:
-            with open("../vector.txt", "a") as myfile:
+            with open(CommonConstants.vektortxt, "a") as myfile:
                 myfile.write(str(i))
                 myfile.write(",")
-        with open("../vector.txt", "a") as myfile:
+        with open(CommonConstants.vektortxt, "a") as myfile:
             myfile.write("\n")
 
     def write_matrix_to_csv(self, filename):
@@ -143,14 +143,14 @@ class Training:
         print("***** write_uniqs_to_file *****")
         '''for line in arr:
             for inst in line:
-                with open("../uniqueopcodes.txt", "a") as myfile:
+                with open(CommonConstants.uniqueopcodesofeachfile, "a") as myfile:
                     myfile.write(inst)
                     myfile.write(", ")
-            with open("../uniqueopcodes.txt", "a") as myfile:
+            with open(CommonConstants.uniqueopcodesofeachfile", "a") as myfile:
                 myfile.write("\n\n")'''
 
         for inst in self.all_uop:
-            with open("../setofuniqueopcodes.txt", "a") as myfile2:
+            with open(CommonConstants.setofuniquecodestxt, "a") as myfile2:
                 myfile2.write(inst)
                 myfile2.write(" ")
 
@@ -175,12 +175,12 @@ class Training:
         print("\nTraining is Finished\n")
 
     def run(self):
-        if os.path.exists("../uniqueopcodes.txt"):
-            os.remove("../uniqueopcodes.txt")
-        if os.path.exists("../setofuniqueopcodes.txt"):
-            os.remove("../setofuniqueopcodes.txt")
-        if os.path.exists("../vector.txt"):
-            os.remove("../vector.txt")
+        if os.path.exists(CommonConstants.uniqueopcodesofeachfile):
+            os.remove(CommonConstants.uniqueopcodesofeachfile)
+        if os.path.exists(CommonConstants.setofuniquecodestxt):
+            os.remove(CommonConstants.setofuniquecodestxt)
+        if os.path.exists(CommonConstants.vektortxt):
+            os.remove(CommonConstants.vektortxt)
         self.extract_unique_opcode()
         self.set_folder_path("../dataset/MPCGEN")
         self.extract_unique_opcode()

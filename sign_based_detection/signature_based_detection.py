@@ -4,7 +4,7 @@ import hashlib
 import shutil
 import CommonConstants
 import testing
-import Main
+import extract_opcode
 
 class SignatureBased:
     def __init__(self, folderpath):
@@ -40,9 +40,9 @@ class SignatureBased:
         print(md5_returned)
 
         print("\nsearch database")
-        is_exist = CommonConstants.response_collection.find_one({'md5': md5_returned})
+        is_exist = CommonConstants.virus_collection.find_one({'md5': md5_returned})
         if is_exist is not None:
-            print("\n Founded in database")
+            print("\nFounded in database")
             self.virus_detected(filepath.replace("\n", ""), md5_returned)
         else:
             print("\nNot in database")
@@ -51,11 +51,16 @@ class SignatureBased:
             flag = testing_project.testing_run()
             if flag is True:
                 self.virus_detected(filepath.replace("\n", ""), md5_returned)
+                jsonFile = {
+                    "md5": md5_returned
+                }
+                CommonConstants.virus_collection.insert(jsonFile)
+                print("Status:", "   Data successfully stored in MongoDB!! md5 : ", str(jsonFile['md5']))
+
             else:
                 flavor2 = easygui.buttonbox(
                     "A file " + filepath + " is not virus!\n",
                     choices=['OK'])
-
 
     def check_folder(self):
         print("\nStarting scan of folder: " + self.folderpath)
@@ -65,7 +70,7 @@ class SignatureBased:
             files.extend(filenames)
             break
         print(files)
-        main_project = Main.run_main()
+        extract_opcode.run_main()
         i = 0
         while i < len(files):
             try:
